@@ -1,206 +1,320 @@
--- MOREIRA HUB - Aimbot UI com Notificação Personalizada
--- Criado por @GMOREIRA (999)
+-- MOREIRA HUB - SCRIPT COMPLETO FUNCIONAL
 
--- CONFIG GLOBAL
-getgenv().AimbotEnabled = false
-getgenv().WallCheckEnabled = false
-getgenv().TeamCheckEnabled = false
-getgenv().SelectedPart = "Head"
-getgenv().FOVRadius = 100
+-- 🔔 Notificação
+pcall(function()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "🔥 MOREIRA NA ÁREA 🔥";
+        Text = "Interface Vermelha Ativada com Sucesso!";
+        Duration = 5;
+    })
+end)
 
--- SERVIÇOS
+-- Serviços
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
-local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
 
--- NOTIFICAÇÃO PERSONALIZADA (VERMELHO/PRETO)
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MoreiraNotification"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+-- Variáveis
+local AimbotOn = false
+local WallCheck = false
+local TeamCheck = false
+local ESPEnabled = false
+local AimPart = "Head"
+local FOVRadius = 100
+local FOVVisible = false
+local FloatButtonVisible = true
+local FOVCircle = Drawing.new("Circle")
 
-local Frame = Instance.new("Frame")
-Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0, 300, 0, 100)
-Frame.Position = UDim2.new(0.5, -150, 0.1, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
-Frame.BorderSizePixel = 0
-Frame.BackgroundTransparency = 0.1
-Frame.AnchorPoint = Vector2.new(0.5, 0)
-Frame.Visible = true
-
-local UIStroke = Instance.new("UIStroke", Frame)
-UIStroke.Color = Color3.fromRGB(255, 0, 0)
-UIStroke.Thickness = 2
-UIStroke.Transparency = 0.1
-
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 8)
-UICorner.Parent = Frame
-
-local TextLabel = Instance.new("TextLabel")
-TextLabel.Parent = Frame
-TextLabel.Size = UDim2.new(1, 0, 1, 0)
-TextLabel.BackgroundTransparency = 1
-TextLabel.Text = "🔥 MOREIRA NA ÁREA 🔥"
-TextLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-TextLabel.TextScaled = true
-TextLabel.Font = Enum.Font.GothamBold
-
-coroutine.wrap(function()
-    task.wait(4)
-    for i = 0, 1, 0.05 do
-        Frame.BackgroundTransparency = i
-        TextLabel.TextTransparency = i
-        UIStroke.Transparency = i
-        task.wait(0.05)
-    end
-    ScreenGui:Destroy()
-end)()
-
--- INTERFACE PRINCIPAL
-local hubGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-hubGui.Name = "MoreiraHub"
-hubGui.ResetOnSpawn = false
-
-local mainFrame = Instance.new("Frame")
-mainFrame.Parent = hubGui
-mainFrame.Size = UDim2.new(0, 300, 0, 250)
-mainFrame.Position = UDim2.new(0.5, -150, 0.5, -125)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-mainFrame.BorderSizePixel = 0
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 8)
-corner.Parent = mainFrame
-
-local title = Instance.new("TextLabel")
-title.Parent = mainFrame
-title.Size = UDim2.new(1, 0, 0, 40)
-title.BackgroundTransparency = 1
-title.Text = "@GMOREIRA (999)"
-title.TextColor3 = Color3.fromRGB(255, 0, 0)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-
-title.TextStrokeTransparency = 0.5
-
-title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-
--- BOTÕES
-local function createButton(name, yPos, callback)
-    local button = Instance.new("TextButton")
-    button.Parent = mainFrame
-    button.Size = UDim2.new(0.8, 0, 0, 30)
-    button.Position = UDim2.new(0.1, 0, 0, yPos)
-    button.Text = name
-    button.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Font = Enum.Font.GothamBold
-    button.TextSize = 14
-    button.MouseButton1Click:Connect(callback)
-    local uiCorner = Instance.new("UICorner", button)
-    uiCorner.CornerRadius = UDim.new(0, 6)
-    return button
-end
-
-local aimbotBtn = createButton("Aimbot: OFF", 50, function(btn)
-    getgenv().AimbotEnabled = not getgenv().AimbotEnabled
-    btn.Text = "Aimbot: " .. (getgenv().AimbotEnabled and "ON" or "OFF")
-end)
-
-local wallCheckBtn = createButton("WallCheck: OFF", 90, function(btn)
-    getgenv().WallCheckEnabled = not getgenv().WallCheckEnabled
-    btn.Text = "WallCheck: " .. (getgenv().WallCheckEnabled and "ON" or "OFF")
-end)
-
-local teamCheckBtn = createButton("TeamCheck: OFF", 130, function(btn)
-    getgenv().TeamCheckEnabled = not getgenv().TeamCheckEnabled
-    btn.Text = "TeamCheck: " .. (getgenv().TeamCheckEnabled and "ON" or "OFF")
-end)
-
-local partDropdown = createButton("Parte: Head", 170, function(btn)
-    if getgenv().SelectedPart == "Head" then
-        getgenv().SelectedPart = "Torso"
-    else
-        getgenv().SelectedPart = "Head"
-    end
-    btn.Text = "Parte: " .. getgenv().SelectedPart
-end)
-
-local minimize = createButton("Minimizar", 210, function()
-    for _, v in ipairs(mainFrame:GetChildren()) do
-        if v:IsA("TextButton") then
-            v.Visible = not v.Visible
-        end
-    end
-end)
-
--- DRAGGABLE
-local dragging, dragInput, dragStart, startPos
-mainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = mainFrame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragging = false end
-        end)
-    end
-end)\n
-mainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-
-RunService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
--- FOV CÍRCULO
-local fovCircle = Drawing.new("Circle")
-fovCircle.Color = Color3.fromRGB(255, 0, 0)
-fovCircle.Thickness = 2
-fovCircle.Filled = false
-fovCircle.Radius = getgenv().FOVRadius
-fovCircle.Visible = true
+-- FOV Visual
+FOVCircle.Visible = FOVVisible
+FOVCircle.Color = Color3.fromRGB(255, 0, 0)
+FOVCircle.Thickness = 2
+FOVCircle.Radius = FOVRadius
+FOVCircle.Filled = false
 
 RunService.RenderStepped:Connect(function()
-    fovCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
-    fovCircle.Radius = getgenv().FOVRadius
+    local viewportSize = workspace.CurrentCamera.ViewportSize
+    FOVCircle.Position = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
 end)
 
--- AIMBOT LÓGICA
-local function getClosestPlayer()
-    local closest, distance = nil, math.huge
+-- Funções auxiliares
+local function IsOnTeam(player)
+    return player.Team == LocalPlayer.Team
+end
+
+local function IsVisible(target)
+    local origin = workspace.CurrentCamera.CFrame.Position
+    local direction = (target.Position - origin).Unit * 1000
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    local result = workspace:Raycast(origin, direction, raycastParams)
+    return not result or result.Instance:IsDescendantOf(target.Parent)
+end
+
+local function GetClosest()
+    local closestPlayer, shortestDistance = nil, math.huge
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(getgenv().SelectedPart) then
-            if getgenv().TeamCheckEnabled and player.Team == LocalPlayer.Team then continue end
-            local part = player.Character[getgenv().SelectedPart]
-            local screenPoint, onScreen = Camera:WorldToScreenPoint(part.Position)
-            if onScreen and (not getgenv().WallCheckEnabled or #Camera:GetPartsObscuringTarget({ part.Position }, { LocalPlayer.Character, Camera }) == 0) then
-                local dist = (Vector2.new(Mouse.X, Mouse.Y) - Vector2.new(screenPoint.X, screenPoint.Y)).Magnitude
-                if dist < getgenv().FOVRadius and dist < distance then
-                    closest = part
-                    distance = dist
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(AimPart) then
+            if TeamCheck and IsOnTeam(player) then continue end
+            if WallCheck and not IsVisible(player.Character[AimPart]) then continue end
+
+            local screenPoint, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character[AimPart].Position)
+            if onScreen then
+                local center = workspace.CurrentCamera.ViewportSize / 2
+                local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - center).Magnitude
+                if distance < shortestDistance and distance <= FOVRadius then
+                    shortestDistance = distance
+                    closestPlayer = player
                 end
             end
         end
     end
-    return closest
+    return closestPlayer
 end
 
+-- Aimbot Loop com suavização
+local smoothness = 0.08
 RunService.RenderStepped:Connect(function()
-    if getgenv().AimbotEnabled then
-        local target = getClosestPlayer()
-        if target then
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
+    FOVCircle.Visible = FOVVisible
+    if AimbotOn then
+        local target = GetClosest()
+        if target and target.Character and target.Character:FindFirstChild(AimPart) then
+            local current = workspace.CurrentCamera.CFrame
+            local targetPos = target.Character[AimPart].Position
+            local newCFrame = CFrame.new(current.Position, targetPos)
+            workspace.CurrentCamera.CFrame = current:Lerp(newCFrame, smoothness)
         end
     end
+end)
+
+-- Criar GUI
+
+-- Botão flutuante (criado antes para poder ser controlado)
+local FloatButton = Instance.new("TextButton")
+FloatButton.Size = UDim2.new(0, 100, 0, 40)
+FloatButton.Position = UDim2.new(0, 10, 1, -60)
+FloatButton.Text = "Aimbot: OFF"
+FloatButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+FloatButton.TextColor3 = Color3.new(1, 1, 1)
+FloatButton.Font = Enum.Font.SourceSansBold
+FloatButton.TextSize = 18
+FloatButton.Visible = false -- começa invisível
+local floatCorner = Instance.new("UICorner")
+floatCorner.CornerRadius = UDim.new(0, 10)
+floatCorner.Parent = FloatButton
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 8)
+    buttonCorner.Parent = Button
+FloatButton.Active = true
+FloatButton.Draggable = true
+FloatButton.Visible = FloatButtonVisible
+FloatButton.Parent = game.CoreGui
+
+FloatButton.MouseButton1Click:Connect(function()
+    AimbotOn = not AimbotOn
+    FloatButton.Text = "Aimbot: " .. (AimbotOn and "ON" or "OFF")
+    FloatButton.BackgroundColor3 = AimbotOn and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(200, 0, 0)
+end)
+
+-- Criação da interface principal
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "MOREIRA_HUB"
+
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Position = UDim2.new(0.3, 0, 0.3, 0)
+Frame.Size = UDim2.new(0, 160, 0, 260)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+
+-- Arredondar borda do Frame
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 12)
+frameCorner.Parent = Frame
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "@GMOREIRA (999)"
+Title.TextColor3 = Color3.fromRGB(255, 0, 0)
+Title.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 22
+
+local Scroll = Instance.new("ScrollingFrame", Frame)
+Scroll.Size = UDim2.new(1, 0, 1, -40)
+Scroll.Position = UDim2.new(0, 0, 0, 40)
+Scroll.CanvasSize = UDim2.new(0, 0, 0, 800)
+Scroll.ScrollBarThickness = 6
+Scroll.BackgroundTransparency = 1
+Scroll.ScrollingDirection = Enum.ScrollingDirection.Y
+
+-- Arredondar borda do Scroll
+local scrollCorner = Instance.new("UICorner")
+scrollCorner.CornerRadius = UDim.new(0, 8)
+scrollCorner.Parent = Scroll
+
+-- Função de botão toggle
+local function CreateToggleButton(name, posY, callback)
+    local Button = Instance.new("TextButton", Scroll)
+    Button.Size = UDim2.new(0, 140, 0, 30)
+    Button.Position = UDim2.new(0, 10, 0, posY)
+    Button.Text = name .. ": OFF"
+    Button.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+    Button.TextColor3 = Color3.new(1, 1, 1)
+    Button.Font = Enum.Font.SourceSans
+    Button.TextSize = 18
+    local state = false
+    Button.MouseButton1Click:Connect(function()
+        state = not state
+        Button.Text = name .. ": " .. (state and "ON" or "OFF")
+        callback(state)
+    end)
+end
+
+-- Botões funcionais
+CreateToggleButton("Aimbot", 10, function(v) AimbotOn = v end)
+CreateToggleButton("WallCheck", 50, function(v) WallCheck = v end)
+CreateToggleButton("TeamCheck", 90, function(v) TeamCheck = v end)
+CreateToggleButton("Mostrar FOV", 130, function(v) FOVVisible = v end)
+CreateToggleButton("Botão Flutuante", 170, function(v)
+    FloatButtonVisible = v
+    if FloatButton then
+        FloatButton.Visible = v
+    end
+end)
+CreateToggleButton("ESP", 210, function(v)
+    ESPEnabled = v
+    for _, player in ipairs(Players:GetPlayers()) do
+        local char = player.Character
+        if char then
+            local exists = char:FindFirstChild("MOREIRA_ESP")
+            if v and not exists then
+                local tag = Instance.new("BillboardGui")
+                tag.Name = "MOREIRA_Name"
+                tag.Size = UDim2.new(0, 100, 0, 20)
+                tag.StudsOffset = Vector3.new(0, 3, 0)
+                tag.AlwaysOnTop = true
+                tag.Parent = char:WaitForChild("Head")
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(1, 0, 1, 0)
+                label.BackgroundTransparency = 1
+                label.Text = player.Name
+                label.TextColor3 = player.Team and player.Team.TeamColor.Color or Color3.new(1, 1, 1)
+                label.Font = Enum.Font.SourceSansBold
+                label.TextSize = 10
+                label.Parent = tag
+                local box = Instance.new("Highlight")
+                box.Name = "MOREIRA_ESP"
+                box.Adornee = char
+                box.FillTransparency = 1
+                box.OutlineTransparency = 0
+                box.OutlineColor = player.Team and player.Team.TeamColor.Color or Color3.new(1, 1, 1)
+                box.Parent = char
+            elseif not v and exists then
+                char:FindFirstChild("MOREIRA_ESP"):Destroy()
+                if char:FindFirstChild("Head") then
+                    local name = char.Head:FindFirstChild("MOREIRA_Name")
+                    if name then name:Destroy() end
+                end
+            end
+        end
+    end
+end)
+
+-- FOV ajustes
+local FOVInc = Instance.new("TextButton", Scroll)
+FOVInc.Size = UDim2.new(0, 140, 0, 30)
+FOVInc.Position = UDim2.new(0, 10, 0, 250)
+FOVInc.Text = "Aumentar FOV"
+FOVInc.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
+FOVInc.TextColor3 = Color3.new(1, 1, 1)
+FOVInc.MouseButton1Click:Connect(function()
+    FOVRadius = FOVRadius + 10
+    FOVCircle.Radius = FOVRadius
+end)
+
+local FOVDec = Instance.new("TextButton", Scroll)
+FOVDec.Size = UDim2.new(0, 140, 0, 30)
+FOVDec.Position = UDim2.new(0, 10, 0, 290)
+FOVDec.Text = "Diminuir FOV"
+FOVDec.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+FOVDec.TextColor3 = Color3.new(1, 1, 1)
+FOVDec.MouseButton1Click:Connect(function()
+    FOVRadius = math.max(10, FOVRadius - 10)
+    FOVCircle.Radius = FOVRadius
+end)
+
+-- Troca parte
+local AimPartButton = Instance.new("TextButton", Scroll)
+AimPartButton.Size = UDim2.new(0, 140, 0, 30)
+AimPartButton.Position = UDim2.new(0, 10, 0, 330)
+AimPartButton.Text = "Mudar Parte: Head"
+AimPartButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+AimPartButton.TextColor3 = Color3.new(1, 1, 1)
+AimPartButton.MouseButton1Click:Connect(function()
+    AimPart = (AimPart == "Head") and "HumanoidRootPart" or "Head"
+    AimPartButton.Text = "Mudar Parte: " .. AimPart
+end)
+
+-- Minimizar
+-- Botão minimizado flutuante
+local MiniCircle = Instance.new("TextButton")
+MiniCircle.Size = UDim2.new(0, 50, 0, 50)
+MiniCircle.Position = UDim2.new(0, 10, 1, -120)
+MiniCircle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+MiniCircle.Text = "🔓"
+MiniCircle.TextColor3 = Color3.new(1, 1, 1)
+MiniCircle.Font = Enum.Font.SourceSansBold
+MiniCircle.TextSize = 28
+MiniCircle.Visible = false
+MiniCircle.Active = true
+MiniCircle.Draggable = true
+MiniCircle.Parent = ScreenGui
+
+local circleCorner = Instance.new("UICorner")
+circleCorner.CornerRadius = UDim.new(1, 0)
+circleCorner.Parent = MiniCircle
+
+MiniCircle.MouseButton1Click:Connect(function()
+    isMinimized = false
+    Frame.Visible = true
+    Scroll.Visible = true
+    MiniCircle.Visible = false
+end)
+
+local MinButton = Instance.new("TextButton", Frame)
+MinButton.Size = UDim2.new(0, 30, 0, 30)
+MinButton.Position = UDim2.new(1, -40, 0, 5)
+MinButton.Text = "-"
+MinButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+MinButton.TextColor3 = Color3.new(1, 1, 1)
+
+local isMinimized = false
+MinButton.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    Scroll.Visible = not isMinimized
+    Frame.Visible = not isMinimized
+    MinButton.Text = isMinimized and "+" or "-"
+    MiniCircle.Visible = isMinimized
+end)
+
+-- Botão flutuante
+local FloatButton = Instance.new("TextButton", ScreenGui)
+FloatButton.Size = UDim2.new(0, 100, 0, 40)
+FloatButton.Position = UDim2.new(0, 10, 1, -60)
+FloatButton.Text = "Aimbot: OFF"
+FloatButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+FloatButton.TextColor3 = Color3.new(1, 1, 1)
+FloatButton.Font = Enum.Font.SourceSansBold
+FloatButton.TextSize = 18
+FloatButton.Active = true
+FloatButton.Draggable = true
+FloatButton.Visible = FloatButtonVisible
+FloatButton.MouseButton1Click:Connect(function()
+    AimbotOn = not AimbotOn
+    FloatButton.Text = "Aimbot: " .. (AimbotOn and "ON" or "OFF")
+    FloatButton.BackgroundColor3 = AimbotOn and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(200, 0, 0)
 end)
