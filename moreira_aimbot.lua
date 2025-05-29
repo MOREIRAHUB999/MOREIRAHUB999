@@ -1,209 +1,206 @@
--- CONFIG
-getgenv().AimbotEnabled = false
-getgenv().WallCheckEnabled = true
-getgenv().TeamCheckEnabled = true
-getgenv().FOVSize = 100
-getgenv().TargetPart = "Head"
+-- MOREIRA HUB - Aimbot UI com Notificação Personalizada
+-- Criado por @GMOREIRA (999)
 
+-- CONFIG GLOBAL
+getgenv().AimbotEnabled = false
+getgenv().WallCheckEnabled = false
+getgenv().TeamCheckEnabled = false
+getgenv().SelectedPart = "Head"
+getgenv().FOVRadius = 100
+
+-- SERVIÇOS
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
+local Mouse = LocalPlayer:GetMouse()
 local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
 
--- FUNÇÃO DE WALLCHECK
-local function hasLineOfSight(targetPart)
-	if not getgenv().WallCheckEnabled then return true end
-	local origin = Camera.CFrame.Position
-	local direction = (targetPart.Position - origin)
-	local raycastParams = RaycastParams.new()
-	raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, Camera}
-	raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-	local result = workspace:Raycast(origin, direction, raycastParams)
-	return result == nil or result.Instance:IsDescendantOf(targetPart.Parent)
-end
-
--- PEGA JOGADOR MAIS PRÓXIMO NO FOV
-local function getClosestPlayer()
-	local closest = nil
-	local shortestDistance = getgenv().FOVSize
-	for _, player in pairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(getgenv().TargetPart) then
-			if not getgenv().TeamCheckEnabled or player.Team ~= LocalPlayer.Team then
-				local part = player.Character[getgenv().TargetPart]
-				local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
-				if onScreen then
-					local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude
-					if distance < shortestDistance and hasLineOfSight(part) then
-						shortestDistance = distance
-						closest = part
-					end
-				end
-			end
-		end
-	end
-	return closest
-end
-
--- LOOP DO AIMBOT
-RunService.RenderStepped:Connect(function()
-	if getgenv().AimbotEnabled then
-		local target = getClosestPlayer()
-		if target then
-			Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
-		end
-	end
-end)
-
--- CÍRCULO DO FOV
-local FOVCircle = Drawing.new("Circle")
-FOVCircle.Color = Color3.fromRGB(255, 0, 0)
-FOVCircle.Thickness = 2
-FOVCircle.Filled = false
-FOVCircle.Transparency = 1
-FOVCircle.Visible = true
-FOVCircle.ZIndex = 2
-
-RunService.RenderStepped:Connect(function()
-	FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-	FOVCircle.Radius = getgenv().FOVSize
-end)
-
--- GUI
+-- NOTIFICAÇÃO PERSONALIZADA (VERMELHO/PRETO)
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MOREIRA"
+ScreenGui.Name = "MoreiraNotification"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 240, 0, 350)
-Frame.Position = UDim2.new(0, 50, 0, 100)
-Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Frame.BorderSizePixel = 0
-Frame.Active = true
-Frame.Draggable = true
 Frame.Parent = ScreenGui
+Frame.Size = UDim2.new(0, 300, 0, 100)
+Frame.Position = UDim2.new(0.5, -150, 0.1, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.BackgroundTransparency = 0.1
+Frame.AnchorPoint = Vector2.new(0.5, 0)
+Frame.Visible = true
 
-local UICorner = Instance.new("UICorner", Frame)
+local UIStroke = Instance.new("UIStroke", Frame)
+UIStroke.Color = Color3.fromRGB(255, 0, 0)
+UIStroke.Thickness = 2
+UIStroke.Transparency = 0.1
+
+local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = Frame
 
-local Shadow = Instance.new("ImageLabel")
-Shadow.Name = "Shadow"
-Shadow.Parent = Frame
-Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-Shadow.Position = UDim2.new(0.5, 0, 0.5, 4)
-Shadow.Size = UDim2.new(1, 12, 1, 12)
-Shadow.BackgroundTransparency = 1
-Shadow.Image = "rbxassetid://1316045217"
-Shadow.ImageTransparency = 0.6
-Shadow.ScaleType = Enum.ScaleType.Slice
-Shadow.SliceCenter = Rect.new(10, 10, 118, 118)
-Shadow.ZIndex = 0
+local TextLabel = Instance.new("TextLabel")
+TextLabel.Parent = Frame
+TextLabel.Size = UDim2.new(1, 0, 1, 0)
+TextLabel.BackgroundTransparency = 1
+TextLabel.Text = "🔥 MOREIRA NA ÁREA 🔥"
+TextLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+TextLabel.TextScaled = true
+TextLabel.Font = Enum.Font.GothamBold
 
--- TÍTULO
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.BackgroundTransparency = 1
-Title.Text = "@GMOREIRA (999)"
-Title.Font = Enum.Font.GothamBlack
-Title.TextSize = 20
-Title.TextColor3 = Color3.fromRGB(255, 50, 50)
-Title.Parent = Frame
+coroutine.wrap(function()
+    task.wait(4)
+    for i = 0, 1, 0.05 do
+        Frame.BackgroundTransparency = i
+        TextLabel.TextTransparency = i
+        UIStroke.Transparency = i
+        task.wait(0.05)
+    end
+    ScreenGui:Destroy()
+end)()
 
--- FUNÇÃO BOTÃO ESTILIZADO
-local function createStyledButton(text, posY)
-	local button = Instance.new("TextButton")
-	button.Size = UDim2.new(1, -20, 0, 36)
-	button.Position = UDim2.new(0, 10, 0, posY)
-	button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-	button.TextColor3 = Color3.new(1, 1, 1)
-	button.Text = text
-	button.Font = Enum.Font.GothamMedium
-	button.TextSize = 16
-	button.Parent = Frame
-	button.AutoButtonColor = false
+-- INTERFACE PRINCIPAL
+local hubGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+hubGui.Name = "MoreiraHub"
+hubGui.ResetOnSpawn = false
 
-	local corner = Instance.new("UICorner", button)
-	corner.CornerRadius = UDim.new(0, 6)
+local mainFrame = Instance.new("Frame")
+mainFrame.Parent = hubGui
+mainFrame.Size = UDim2.new(0, 300, 0, 250)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -125)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BorderSizePixel = 0
 
-	local gradient = Instance.new("UIGradient", button)
-	gradient.Color = ColorSequence.new{
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 60, 60)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 0, 0))
-	}
-	gradient.Rotation = 90
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = mainFrame
 
-	local stroke = Instance.new("UIStroke", button)
-	stroke.Color = Color3.fromRGB(100, 0, 0)
-	stroke.Thickness = 1
+local title = Instance.new("TextLabel")
+title.Parent = mainFrame
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundTransparency = 1
+title.Text = "@GMOREIRA (999)"
+title.TextColor3 = Color3.fromRGB(255, 0, 0)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
 
-	button.MouseEnter:Connect(function()
-		gradient.Rotation = 0
-	end)
-	button.MouseLeave:Connect(function()
-		gradient.Rotation = 90
-	end)
+title.TextStrokeTransparency = 0.5
 
-	return button
+title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+-- BOTÕES
+local function createButton(name, yPos, callback)
+    local button = Instance.new("TextButton")
+    button.Parent = mainFrame
+    button.Size = UDim2.new(0.8, 0, 0, 30)
+    button.Position = UDim2.new(0.1, 0, 0, yPos)
+    button.Text = name
+    button.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 14
+    button.MouseButton1Click:Connect(callback)
+    local uiCorner = Instance.new("UICorner", button)
+    uiCorner.CornerRadius = UDim.new(0, 6)
+    return button
 end
 
--- BOTÕES DO HUB
-local btnAimbot = createStyledButton("Aimbot: OFF", 50)
-btnAimbot.MouseButton1Click:Connect(function()
-	getgenv().AimbotEnabled = not getgenv().AimbotEnabled
-	btnAimbot.Text = "Aimbot: " .. (getgenv().AimbotEnabled and "ON" or "OFF")
+local aimbotBtn = createButton("Aimbot: OFF", 50, function(btn)
+    getgenv().AimbotEnabled = not getgenv().AimbotEnabled
+    btn.Text = "Aimbot: " .. (getgenv().AimbotEnabled and "ON" or "OFF")
 end)
 
-local btnWallCheck = createStyledButton("WallCheck: ON", 100)
-btnWallCheck.MouseButton1Click:Connect(function()
-	getgenv().WallCheckEnabled = not getgenv().WallCheckEnabled
-	btnWallCheck.Text = "WallCheck: " .. (getgenv().WallCheckEnabled and "ON" or "OFF")
+local wallCheckBtn = createButton("WallCheck: OFF", 90, function(btn)
+    getgenv().WallCheckEnabled = not getgenv().WallCheckEnabled
+    btn.Text = "WallCheck: " .. (getgenv().WallCheckEnabled and "ON" or "OFF")
 end)
 
-local btnTeamCheck = createStyledButton("TeamCheck: ON", 150)
-btnTeamCheck.MouseButton1Click:Connect(function()
-	getgenv().TeamCheckEnabled = not getgenv().TeamCheckEnabled
-	btnTeamCheck.Text = "TeamCheck: " .. (getgenv().TeamCheckEnabled and "ON" or "OFF")
+local teamCheckBtn = createButton("TeamCheck: OFF", 130, function(btn)
+    getgenv().TeamCheckEnabled = not getgenv().TeamCheckEnabled
+    btn.Text = "TeamCheck: " .. (getgenv().TeamCheckEnabled and "ON" or "OFF")
 end)
 
-local btnFOV = createStyledButton("FOV: " .. getgenv().FOVSize, 200)
-btnFOV.MouseButton1Click:Connect(function()
-	getgenv().FOVSize = getgenv().FOVSize + 25
-	if getgenv().FOVSize > 300 then getgenv().FOVSize = 50 end
-	btnFOV.Text = "FOV: " .. getgenv().FOVSize
+local partDropdown = createButton("Parte: Head", 170, function(btn)
+    if getgenv().SelectedPart == "Head" then
+        getgenv().SelectedPart = "Torso"
+    else
+        getgenv().SelectedPart = "Head"
+    end
+    btn.Text = "Parte: " .. getgenv().SelectedPart
 end)
 
-local BodyParts = {"Head", "HumanoidRootPart", "UpperTorso"}
-local partIndex = 1
-local btnPart = createStyledButton("Parte: " .. getgenv().TargetPart, 250)
-btnPart.MouseButton1Click:Connect(function()
-	partIndex = partIndex + 1
-	if partIndex > #BodyParts then partIndex = 1 end
-	getgenv().TargetPart = BodyParts[partIndex]
-	btnPart.Text = "Parte: " .. getgenv().TargetPart
+local minimize = createButton("Minimizar", 210, function()
+    for _, v in ipairs(mainFrame:GetChildren()) do
+        if v:IsA("TextButton") then
+            v.Visible = not v.Visible
+        end
+    end
 end)
 
--- BOTÃO DE MINIMIZAR COM REDUÇÃO DE TAMANHO
-local isMinimized = false
-local originalSize = Frame.Size
-local btnToggle = createStyledButton("Minimizar", 300)
-btnToggle.MouseButton1Click:Connect(function()
-	isMinimized = not isMinimized
+-- DRAGGABLE
+local dragging, dragInput, dragStart, startPos
+mainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)\n
+mainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
 
-	for _, child in ipairs(Frame:GetChildren()) do
-		if child:IsA("TextButton") and child ~= btnToggle then
-			child.Visible = not isMinimized
-		end
-	end
+RunService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
 
-	Title.Visible = not isMinimized
+-- FOV CÍRCULO
+local fovCircle = Drawing.new("Circle")
+fovCircle.Color = Color3.fromRGB(255, 0, 0)
+fovCircle.Thickness = 2
+fovCircle.Filled = false
+fovCircle.Radius = getgenv().FOVRadius
+fovCircle.Visible = true
 
-	if isMinimized then
-		Frame.Size = UDim2.new(0, 240, 0, 60)
-		btnToggle.Position = UDim2.new(0, 10, 0, 10)
-	else
-		Frame.Size = originalSize
-		btnToggle.Position = UDim2.new(0, 10, 0, 300)
-	end
+RunService.RenderStepped:Connect(function()
+    fovCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
+    fovCircle.Radius = getgenv().FOVRadius
+end)
 
-	btnToggle.Text = isMinimized and "Restaurar" or "Minimizar"
+-- AIMBOT LÓGICA
+local function getClosestPlayer()
+    local closest, distance = nil, math.huge
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(getgenv().SelectedPart) then
+            if getgenv().TeamCheckEnabled and player.Team == LocalPlayer.Team then continue end
+            local part = player.Character[getgenv().SelectedPart]
+            local screenPoint, onScreen = Camera:WorldToScreenPoint(part.Position)
+            if onScreen and (not getgenv().WallCheckEnabled or #Camera:GetPartsObscuringTarget({ part.Position }, { LocalPlayer.Character, Camera }) == 0) then
+                local dist = (Vector2.new(Mouse.X, Mouse.Y) - Vector2.new(screenPoint.X, screenPoint.Y)).Magnitude
+                if dist < getgenv().FOVRadius and dist < distance then
+                    closest = part
+                    distance = dist
+                end
+            end
+        end
+    end
+    return closest
+end
+
+RunService.RenderStepped:Connect(function()
+    if getgenv().AimbotEnabled then
+        local target = getClosestPlayer()
+        if target then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
+        end
+    end
 end)
