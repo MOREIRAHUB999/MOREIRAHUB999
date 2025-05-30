@@ -75,7 +75,7 @@ local function GetClosest()
 end
 
 -- Aimbot Loop com suavização
-local smoothness = 0.08
+local smoothness = 0.05
 RunService.RenderStepped:Connect(function()
     FOVCircle.Visible = FOVVisible
     if AimbotOn then
