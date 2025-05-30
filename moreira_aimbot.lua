@@ -75,7 +75,7 @@ local function GetClosest()
 end
 
 -- Aimbot Loop com suavização
-local smoothness = 0.05
+local smoothness = 0.08
 RunService.RenderStepped:Connect(function()
     FOVCircle.Visible = FOVVisible
     if AimbotOn then
@@ -248,6 +248,41 @@ FOVDec.MouseButton1Click:Connect(function()
 end)
 
 -- Troca parte
+
+-- Label da puxada
+local SmoothnessLabel = Instance.new("TextLabel", Scroll)
+SmoothnessLabel.Size = UDim2.new(0, 140, 0, 20)
+SmoothnessLabel.Position = UDim2.new(0, 10, 0, 370)
+SmoothnessLabel.BackgroundTransparency = 1
+SmoothnessLabel.TextColor3 = Color3.new(1, 1, 1)
+SmoothnessLabel.Text = "Puxada: " .. string.format("%.2f", smoothness)
+SmoothnessLabel.Font = Enum.Font.SourceSansBold
+SmoothnessLabel.TextSize = 16
+
+-- Botão Aumentar puxada (reduz suavização, mais rápido)
+local PullInc = Instance.new("TextButton", Scroll)
+PullInc.Size = UDim2.new(0, 140, 0, 30)
+PullInc.Position = UDim2.new(0, 10, 0, 395)
+PullInc.Text = "Aumentar Puxada"
+PullInc.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+PullInc.TextColor3 = Color3.new(1, 1, 1)
+PullInc.MouseButton1Click:Connect(function()
+    smoothness = math.max(0.01, smoothness - 0.01)
+    SmoothnessLabel.Text = "Puxada: " .. string.format("%.2f", smoothness)
+end)
+
+-- Botão Diminuir puxada (mais suave)
+local PullDec = Instance.new("TextButton", Scroll)
+PullDec.Size = UDim2.new(0, 140, 0, 30)
+PullDec.Position = UDim2.new(0, 10, 0, 435)
+PullDec.Text = "Diminuir Puxada"
+PullDec.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+PullDec.TextColor3 = Color3.new(1, 1, 1)
+PullDec.MouseButton1Click:Connect(function()
+    smoothness = math.min(1, smoothness + 0.01)
+    SmoothnessLabel.Text = "Puxada: " .. string.format("%.2f", smoothness)
+end)
+
 local AimPartButton = Instance.new("TextButton", Scroll)
 AimPartButton.Size = UDim2.new(0, 140, 0, 30)
 AimPartButton.Position = UDim2.new(0, 10, 0, 330)
