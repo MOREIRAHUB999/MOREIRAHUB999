@@ -137,7 +137,7 @@ frameCorner.Parent = Frame
 
 local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Text = "@GMOREIRA (999)"
+Title.Text = "MOREIRA HUB(🎮)"
 Title.TextColor3 = Color3.fromRGB(255, 0, 0)
 Title.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
 Title.Font = Enum.Font.SourceSansBold
@@ -259,11 +259,11 @@ SmoothnessLabel.Text = "Puxada: " .. string.format("%.2f", smoothness)
 SmoothnessLabel.Font = Enum.Font.SourceSansBold
 SmoothnessLabel.TextSize = 16
 
--- Botão Aumentar puxada (reduz suavização, mais rápido)
+-- Botão diminuir (❄️) (reduz suavização, mais rápido)
 local PullInc = Instance.new("TextButton", Scroll)
 PullInc.Size = UDim2.new(0, 140, 0, 30)
 PullInc.Position = UDim2.new(0, 10, 0, 395)
-PullInc.Text = "Aumentar Puxada"
+PullInc.Text = "diminuir (❄️)"
 PullInc.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
 PullInc.TextColor3 = Color3.new(1, 1, 1)
 PullInc.MouseButton1Click:Connect(function()
@@ -271,11 +271,11 @@ PullInc.MouseButton1Click:Connect(function()
     SmoothnessLabel.Text = "Puxada: " .. string.format("%.2f", smoothness)
 end)
 
--- Botão Diminuir puxada (mais suave)
+-- Botão aumentar (🔥) (mais suave)
 local PullDec = Instance.new("TextButton", Scroll)
 PullDec.Size = UDim2.new(0, 140, 0, 30)
 PullDec.Position = UDim2.new(0, 10, 0, 435)
-PullDec.Text = "Diminuir Puxada"
+PullDec.Text = "Aumentar (🔥)"
 PullDec.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 PullDec.TextColor3 = Color3.new(1, 1, 1)
 PullDec.MouseButton1Click:Connect(function()
@@ -300,7 +300,7 @@ local MiniCircle = Instance.new("TextButton")
 MiniCircle.Size = UDim2.new(0, 50, 0, 50)
 MiniCircle.Position = UDim2.new(0, 10, 1, -120)
 MiniCircle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-MiniCircle.Text = "🔓"
+MiniCircle.Text = "MH✅"
 MiniCircle.TextColor3 = Color3.new(1, 1, 1)
 MiniCircle.Font = Enum.Font.SourceSansBold
 MiniCircle.TextSize = 28
