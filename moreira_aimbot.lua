@@ -1,3 +1,4 @@
+local isMinimized = true
 -- MOREIRA HUB - SCRIPT COMPLETO FUNCIONAL
 
 -- 🔔 Notificação
@@ -23,7 +24,7 @@ local ESPEnabled = false
 local AimPart = "Head"
 local FOVRadius = 100
 local FOVVisible = false
-local FloatButtonVisible = true
+FloatButtonVisible = false
 local FOVCircle = Drawing.new("Circle")
 
 -- FOV Visual
@@ -92,9 +93,9 @@ end)
 -- Criar GUI
 
 -- Botão flutuante (criado antes para poder ser controlado)
-local FloatButton = Instance.new("TextButton")
+FloatButton = Instance.new("TextButton")
 FloatButton.Size = UDim2.new(0, 100, 0, 40)
-FloatButton.Position = UDim2.new(0, 10, 1, -60)
+FloatButton.Position = UDim2.new(1, -120, 0, 80)
 FloatButton.Text = "Aimbot: OFF"
 FloatButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 FloatButton.TextColor3 = Color3.new(1, 1, 1)
@@ -296,35 +297,33 @@ end)
 
 -- Minimizar
 -- Botão minimizado flutuante
-local MiniCircle = Instance.new("TextButton")
+
+-- Botão minimizado com imagem (ImageButton)
+local MiniCircle = Instance.new("ImageButton")
+MiniCircle.Name = "MiniCircle"
 MiniCircle.Size = UDim2.new(0, 50, 0, 50)
-MiniCircle.Position = UDim2.new(0, 10, 1, -120)
+MiniCircle.Position = UDim2.new(0.5, -25, 0, 10)
 MiniCircle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-MiniCircle.Text = "MH✅"
-MiniCircle.TextColor3 = Color3.new(1, 1, 1)
-MiniCircle.Font = Enum.Font.SourceSansBold
-MiniCircle.TextSize = 28
-MiniCircle.Visible = false
+MiniCircle.Image = "rbxassetid://6031280882" -- ÍCONE EXEMPLO
+MiniCircle.ImageColor3 = Color3.new(1, 1, 1)
+MiniCircle.Parent = ScreenGui
+MiniCircle.Visible = true
 MiniCircle.Active = true
 MiniCircle.Draggable = true
-MiniCircle.Parent = ScreenGui
--- Iniciar minimizado automaticamente
-Frame.Visible = false
-Scroll.Visible = false
-MiniCircle.Visible = true
-isMinimized = true
-
-
-local circleCorner = Instance.new("UICorner")
+local circleCorner = Instance.new("UICorner", MiniCircle)
 circleCorner.CornerRadius = UDim.new(1, 0)
-circleCorner.Parent = MiniCircle
+
 
 MiniCircle.MouseButton1Click:Connect(function()
-    isMinimized = false
-    Frame.Visible = true
-    Scroll.Visible = true
-    MiniCircle.Visible = false
+    if isMinimized then
+        Frame.Visible = true
+        Scroll.Visible = true
+        MiniCircle.Visible = false
+        isMinimized = false
+    end
 end)
+
+
 
 local MinButton = Instance.new("TextButton", Frame)
 MinButton.Size = UDim2.new(0, 30, 0, 30)
@@ -333,7 +332,8 @@ MinButton.Text = "-"
 MinButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 MinButton.TextColor3 = Color3.new(1, 1, 1)
 
-local isMinimized = false
+
+
 MinButton.MouseButton1Click:Connect(function()
     Frame.Visible = false
     Scroll.Visible = false
@@ -341,10 +341,11 @@ MinButton.MouseButton1Click:Connect(function()
     isMinimized = true
 end)
 
+
 -- Botão flutuante
-local FloatButton = Instance.new("TextButton", ScreenGui)
+FloatButton = Instance.new("TextButton", ScreenGui)
 FloatButton.Size = UDim2.new(0, 100, 0, 40)
-FloatButton.Position = UDim2.new(0, 10, 1, -60)
+FloatButton.Position = UDim2.new(1, -120, 0, 80)
 FloatButton.Text = "Aimbot: OFF"
 FloatButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 FloatButton.TextColor3 = Color3.new(1, 1, 1)
@@ -357,4 +358,12 @@ FloatButton.MouseButton1Click:Connect(function()
     AimbotOn = not AimbotOn
     FloatButton.Text = "Aimbot: " .. (AimbotOn and "ON" or "OFF")
     FloatButton.BackgroundColor3 = AimbotOn and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(200, 0, 0)
+end)
+
+-- Garantir que tudo inicie minimizado
+task.defer(function()
+    Frame.Visible = false
+    Scroll.Visible = false
+    MiniCircle.Visible = true
+    isMinimized = true
 end)
