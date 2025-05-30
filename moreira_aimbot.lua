@@ -308,6 +308,12 @@ MiniCircle.Visible = false
 MiniCircle.Active = true
 MiniCircle.Draggable = true
 MiniCircle.Parent = ScreenGui
+-- Iniciar minimizado automaticamente
+Frame.Visible = false
+Scroll.Visible = false
+MiniCircle.Visible = true
+isMinimized = true
+
 
 local circleCorner = Instance.new("UICorner")
 circleCorner.CornerRadius = UDim.new(1, 0)
@@ -329,11 +335,10 @@ MinButton.TextColor3 = Color3.new(1, 1, 1)
 
 local isMinimized = false
 MinButton.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    Scroll.Visible = not isMinimized
-    Frame.Visible = not isMinimized
-    MinButton.Text = isMinimized and "+" or "-"
-    MiniCircle.Visible = isMinimized
+    Frame.Visible = false
+    Scroll.Visible = false
+    MiniCircle.Visible = true
+    isMinimized = true
 end)
 
 -- Botão flutuante
